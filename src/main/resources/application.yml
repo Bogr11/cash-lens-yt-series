@@ -1,0 +1,18 @@
+spring:
+
+  application:
+    name: cash-lens
+
+  datasource:
+    #url: jdbc:postgresql://ep-curly-star-ag3tbzie.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
+    url: YOUR_URL # can be obtained here - https://console.neon.tech/
+    username: neondb_owner
+    password: YOUR_PASSWORD
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true

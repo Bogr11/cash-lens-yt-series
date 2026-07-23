@@ -1,0 +1,1 @@
+curl.exe -i -X POST http://localhost:8080/inbound/save/text -H "Content-Type: application/json" -d "@request.json"
