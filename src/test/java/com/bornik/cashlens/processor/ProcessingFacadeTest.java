@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ParserServiceTest {
+class ProcessingFacadeTest {
 
     @Mock
     private ExpenseAiAssistant assistant;
@@ -25,13 +25,13 @@ class ParserServiceTest {
     private ExpenseRepository repository;
 
     @InjectMocks
-    private ParserService parserService;
+    private ProcessingFacade processingFacade;
 
     @Test
     void savesParsedExpense() {
         given(new ParsedExpense(new BigDecimal("185.00"), "EUR", "EATING_OUT", "coffee", 0.95));
 
-        parserService.parseAndSave(textMessage("coffee 185"));
+        processingFacade.process(textMessage("coffee 185"));
 
         Expense saved = captureSaved();
         assertThat(saved.getAmount()).isEqualByComparingTo("185.00");
@@ -46,7 +46,7 @@ class ParserServiceTest {
     void keepsLowConfidenceFromVagueInput() {
         given(new ParsedExpense(new BigDecimal("5"), "EUR", "OTHER", "unclear purchase", 0.2));
 
-        parserService.parseAndSave(textMessage("5 for that thing"));
+        processingFacade.process(textMessage("5 for that thing"));
 
         Expense saved = captureSaved();
         assertThat(saved.getConfidence()).isEqualTo(0.2);

@@ -1,6 +1,6 @@
 package com.bornik.cashlens.inbound;
 
-import com.bornik.cashlens.processor.ParserService;
+import com.bornik.cashlens.processor.ProcessingFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 class InboundService {
 
     private final InboundMessageRepository repository;
-    private final ParserService parserService;
+    private final ProcessingFacade processingFacade;
 
-    void process(String payload) {
+    void receive(String payload) {
         InboundMessage message = repository.save(new InboundMessage(payload, InputSource.TEXT_MESSAGE));
-        parserService.parseAndSave(new InboundMessageDto(message));
+        processingFacade.process(new InboundMessageDto(message));
     }
 
 }

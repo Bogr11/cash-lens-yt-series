@@ -16,7 +16,7 @@ class InboundController {
 
     @PostMapping("/save/text")
     ResponseEntity<?> saveTextMessage(@RequestBody InboundTextMessageDto inboundTextMessageDto) {
-        service.process(inboundTextMessageDto.payload());
+        service.receive(inboundTextMessageDto.payload());
         return ResponseEntity.accepted().build();
     }
 
