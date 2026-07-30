@@ -3,16 +3,22 @@ spring:
   application:
     name: cash-lens
 
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
-    #url: jdbc:postgresql://ep-curly-star-ag3tbzie.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
-    url: YOUR_URL # can be obtained here - https://console.neon.tech/
-    username: neondb_owner
-    password: YOUR_PASSWORD
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
     show-sql: true
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: ${GEMINI_MODEL:gemini-3.6-flash}
