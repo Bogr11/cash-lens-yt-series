@@ -5,8 +5,8 @@ package com.bornik.cashlens.inbound;
  */
 public final class InboundMessages {
 
-    public static InboundMessageDto textMessage(String payload) {
-        return new InboundMessageDto(new InboundMessage(payload, InputSource.TEXT_MESSAGE));
+    public static InboundMessageDto textMessage(String externalId, String payload) {
+        return new InboundMessageDto(InboundMessage.received(externalId, payload, InputSource.TEXT_MESSAGE));
     }
 
     private InboundMessages() {

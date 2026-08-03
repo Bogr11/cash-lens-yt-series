@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/inbound")
 @RequiredArgsConstructor
@@ -15,13 +17,16 @@ class InboundController {
     private final InboundService service;
 
     @PostMapping("/save/text")
-    ResponseEntity<?> saveTextMessage(@RequestBody InboundTextMessageDto inboundTextMessageDto) {
-        service.receive(inboundTextMessageDto.payload());
+    ResponseEntity<?> saveTextMessage(@RequestBody InboundTextMessageDto dto) {
+        service.receive(dto.externalId(), dto.payload());
         return ResponseEntity.accepted().build();
     }
 
-    record InboundTextMessageDto(String payload) {
-
+    record InboundTextMessageDto(String externalId, String payload) {
+        InboundTextMessageDto {
+            Objects.requireNonNull(externalId);
+            Objects.requireNonNull(payload);
+        }
     }
 
 }

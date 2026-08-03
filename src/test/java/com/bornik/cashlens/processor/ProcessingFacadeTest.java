@@ -31,7 +31,7 @@ class ProcessingFacadeTest {
     void savesParsedExpense() {
         given(new ParsedExpense(new BigDecimal("185.00"), "EUR", "EATING_OUT", "coffee", 0.95));
 
-        processingFacade.process(textMessage("coffee 185"));
+        processingFacade.process(textMessage("ext_id_1", "coffee 185"));
 
         Expense saved = captureSaved();
         assertThat(saved.getAmount()).isEqualByComparingTo("185.00");
@@ -46,7 +46,7 @@ class ProcessingFacadeTest {
     void keepsLowConfidenceFromVagueInput() {
         given(new ParsedExpense(new BigDecimal("5"), "EUR", "OTHER", "unclear purchase", 0.2));
 
-        processingFacade.process(textMessage("5 for that thing"));
+        processingFacade.process(textMessage("ext_id_2", "5 for that thing"));
 
         Expense saved = captureSaved();
         assertThat(saved.getConfidence()).isEqualTo(0.2);

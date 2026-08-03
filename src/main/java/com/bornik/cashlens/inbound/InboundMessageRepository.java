@@ -5,4 +5,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 interface InboundMessageRepository extends JpaRepository<InboundMessage, Long> {
+
+    boolean existsByExternalId(String externalId);
+
 }
