@@ -13,25 +13,30 @@ import java.time.Instant;
 @Entity
 @Table(name = "expense")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column(nullable = false)
     private String currency;
 
+    @Column(nullable = false)
     private String category;
 
+    @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private Double confidence;
 
     @Column(nullable = false, updatable = false)
-    private final Instant createdDate = Instant.now();
+    private Instant createdDate;
 
     Expense(ParsedExpense parsed) {
         this.amount = parsed.amount();
@@ -39,6 +44,7 @@ class Expense {
         this.category = parsed.category();
         this.description = parsed.description();
         this.confidence = parsed.confidence();
+        this.createdDate = Instant.now();
     }
 
 }
