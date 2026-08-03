@@ -2,9 +2,11 @@ package com.bornik.cashlens.inbound;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
+@ToString
 @Entity
 @Table(name = "inbound_message")
 @Getter

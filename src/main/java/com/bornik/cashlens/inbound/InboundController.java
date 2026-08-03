@@ -15,12 +15,12 @@ class InboundController {
     private final InboundService service;
 
     @PostMapping("/save/text")
-    ResponseEntity<?> saveTextMessage(@RequestBody InboundTextDto inboundTextDto) {
-        service.saveTextMessage(inboundTextDto.payload());
+    ResponseEntity<?> saveTextMessage(@RequestBody InboundTextMessageDto inboundTextMessageDto) {
+        service.receive(inboundTextMessageDto.payload());
         return ResponseEntity.accepted().build();
     }
 
-    record InboundTextDto(String payload) {
+    record InboundTextMessageDto(String payload) {
 
     }
 
