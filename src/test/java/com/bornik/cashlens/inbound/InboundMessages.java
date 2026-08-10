@@ -13,6 +13,10 @@ public final class InboundMessages {
         return new InboundMessageDto(fileName, InputSource.PHOTO, content);
     }
 
+    public static InboundMessageDto voice(byte[] content, String fileName) {
+        return new InboundMessageDto(fileName, InputSource.VOICE_MESSAGE, content);
+    }
+
     private InboundMessages() {
     }
 
