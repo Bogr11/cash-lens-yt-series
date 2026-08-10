@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -19,17 +20,25 @@ class InboundService {
     private final InboundMessageRepository repository;
     private final ProcessingFacade processingFacade;
 
-    void receive(String externalId, String payload) {
+    void receiveAsText(String externalId, String payload) {
+        acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
+    }
+
+    void receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
+        acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
+    }
+
+    private void acceptMsg(String externalId, Supplier<InboundMessage> message) {
         if (repository.existsByExternalId(externalId)) {
             log.info("Received duplicate request. Skipping. ExternalId={}", externalId);
             return;
         }
 
-        InboundMessage message = repository.save(InboundMessage.received(externalId, payload, InputSource.TEXT_MESSAGE));
+        InboundMessage saved = repository.save(message.get());
 
         CompletableFuture
-                .runAsync(() -> process(message), EXECUTOR)
-                .whenComplete((r, t) -> log.info("Processed: ExternalId = {}. Payload = {}.", externalId, payload));
+                .runAsync(() -> process(saved), EXECUTOR)
+                .whenComplete((r, t) -> log.info("Processed: ExternalId = {}. Message = {}.", externalId, message.get()));
     }
 
     private void process(InboundMessage message) {

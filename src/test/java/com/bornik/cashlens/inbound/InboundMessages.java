@@ -6,7 +6,7 @@ package com.bornik.cashlens.inbound;
 public final class InboundMessages {
 
     public static InboundMessageDto textMessage(String externalId, String payload) {
-        return new InboundMessageDto(InboundMessage.received(externalId, payload, InputSource.TEXT_MESSAGE));
+        return new InboundMessageDto(InboundMessage.receivedAsText(externalId, payload));
     }
 
     private InboundMessages() {
