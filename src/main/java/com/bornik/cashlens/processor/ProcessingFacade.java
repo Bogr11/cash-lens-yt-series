@@ -2,11 +2,15 @@ package com.bornik.cashlens.processor;
 
 import com.bornik.cashlens.inbound.InboundMessageDto;
 import dev.langchain4j.data.audio.Audio;
+import dev.langchain4j.data.image.Image;
 import dev.langchain4j.data.message.AudioContent;
+import dev.langchain4j.data.message.ImageContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Base64;
 
 @Slf4j
 @Service
@@ -36,25 +40,45 @@ public class ProcessingFacade {
         return parsed;
     }
 
-    private ParsedExpense fromVoice(InboundMessageDto message) {
-        return voiceAiAssistant.extract(AudioContent.from(Audio.builder()
-                шт.base64Data()
-
-
-        ));
-    }
-
-    private String base64(InboundMessageDto message) {
-        byte[] content = message;
-    }
-
-    private ParsedExpense fromPicture(InboundMessageDto message) {
-        return receiptAiAssistant.extract();
-    }
-
     private void save(ParsedExpense parsed) {
         var saved = repository.save(new Expense(parsed));
         log.info("Saved {}", saved);
+    }
+
+    private ParsedExpense fromVoice(InboundMessageDto message) {
+        return voiceAiAssistant.extract(AudioContent.from(Audio.builder()
+                .base64Data(base64(message))
+                .mimeType(contentTypeOf(message, MimeTypes.DEFAULT_AUDIO_TYPE))
+                .build()));
+    }
+
+    private ParsedExpense fromPicture(InboundMessageDto message) {
+        return receiptAiAssistant.extract(ImageContent.from(Image.builder()
+                .base64Data(base64(message))
+                .mimeType(contentTypeOf(message, MimeTypes.DEFAULT_IMAGE_TYPE))
+                .build()));
+    }
+
+    private String contentTypeOf(InboundMessageDto message, String fallback) {
+        String contentType = message.contentType();
+        if (contentType == null || contentType.isBlank() || contentType.equals(MimeTypes.GENERIC_BINARY)) {
+            return fallback;
+        }
+        return contentType;
+    }
+
+    private String base64(InboundMessageDto message) {
+        byte[] content = message.content();
+        if (content == null || content.length == 0) {
+            throw new IllegalStateException(message.source() + " message carries no content");
+        }
+        return Base64.getEncoder().encodeToString(content);
+    }
+
+    private static class MimeTypes {
+        private static final String DEFAULT_IMAGE_TYPE = "image/jpeg";
+        private static final String DEFAULT_AUDIO_TYPE = "audio/mp4";
+        private static final String GENERIC_BINARY = "application/octet-stream";
     }
 
 }
