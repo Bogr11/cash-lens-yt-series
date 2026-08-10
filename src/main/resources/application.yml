@@ -19,6 +19,16 @@ spring:
         format_sql: true
     show-sql: true
 
+  servlet:
+    multipart:
+      # default is 1MB — a phone photo is 3-5MB and would fail with
+      # MaxUploadSizeExceededException before reaching the controller
+      max-file-size: 10MB
+      max-request-size: 12MB
+
 gemini:
   api-key: ${GEMINI_API_KEY}
   model: ${GEMINI_MODEL:gemini-3.6-flash}
+
+cashlens:
+  upload-dir: ./uploads

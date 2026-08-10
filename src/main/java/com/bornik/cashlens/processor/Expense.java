@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @ToString
 @Entity
@@ -35,6 +36,14 @@ class Expense {
     @Column(nullable = false)
     private Double confidence;
 
+    /** Nullable: a typed sentence rarely names the shop, a receipt almost always does. */
+    @Column
+    private String merchant;
+
+    /** The date on the receipt, not the moment we processed it. Nullable for the same reason. */
+    @Column
+    private LocalDate occurredAt;
+
     @Column(nullable = false, updatable = false)
     private Instant createdDate;
 
@@ -43,6 +52,8 @@ class Expense {
         this.currency = parsed.currency();
         this.category = parsed.category();
         this.description = parsed.description();
+        this.merchant = parsed.merchant();
+        this.occurredAt = parsed.occurredAt();
         this.confidence = parsed.confidence();
         this.createdDate = Instant.now();
     }

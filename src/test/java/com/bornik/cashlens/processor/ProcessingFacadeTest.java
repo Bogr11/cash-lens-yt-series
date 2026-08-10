@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import static com.bornik.cashlens.inbound.InboundMessages.textMessage;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,28 +30,47 @@ class ProcessingFacadeTest {
 
     @Test
     void savesParsedExpense() {
-        given(new ParsedExpense(new BigDecimal("185.00"), "EUR", "EATING_OUT", "coffee", 0.95));
+        given(parsed("185.00", "EATING_OUT", "coffee", "Blue Bottle", LocalDate.of(2026, 8, 1), 0.95));
 
-        processingFacade.process(textMessage("ext_id_1", "coffee 185"));
+        processingFacade.process(textMessage("coffee 185"));
 
         Expense saved = captureSaved();
         assertThat(saved.getAmount()).isEqualByComparingTo("185.00");
         assertThat(saved.getCurrency()).isEqualTo("EUR");
         assertThat(saved.getCategory()).isEqualTo("EATING_OUT");
         assertThat(saved.getDescription()).isEqualTo("coffee");
+        assertThat(saved.getMerchant()).isEqualTo("Blue Bottle");
+        assertThat(saved.getOccurredAt()).isEqualTo(LocalDate.of(2026, 8, 1));
         assertThat(saved.getConfidence()).isEqualTo(0.95);
         assertThat(saved.getCreatedDate()).isNotNull();
     }
 
     @Test
     void keepsLowConfidenceFromVagueInput() {
-        given(new ParsedExpense(new BigDecimal("5"), "EUR", "OTHER", "unclear purchase", 0.2));
+        given(parsed("5", "OTHER", "unclear purchase", null, null, 0.2));
 
-        processingFacade.process(textMessage("ext_id_2", "5 for that thing"));
+        processingFacade.process(textMessage("5 for that thing"));
 
         Expense saved = captureSaved();
         assertThat(saved.getConfidence()).isEqualTo(0.2);
         assertThat(saved.getCategory()).isEqualTo("OTHER");
+    }
+
+    @Test
+    void leavesMerchantAndDateEmptyWhenTextDoesNotCarryThem() {
+        given(parsed("12.50", "TRANSPORT", "taxi home", null, null, 0.7));
+
+        processingFacade.process(textMessage("taxi home 12.50"));
+
+        Expense saved = captureSaved();
+        assertThat(saved.getMerchant()).isNull();
+        assertThat(saved.getOccurredAt()).isNull();
+    }
+
+    private ParsedExpense parsed(String amount, String category, String description,
+                                 String merchant, LocalDate occurredAt, double confidence) {
+        return new ParsedExpense(new BigDecimal(amount), "EUR", category, description,
+                merchant, occurredAt, confidence);
     }
 
     private void given(ParsedExpense parsed) {
