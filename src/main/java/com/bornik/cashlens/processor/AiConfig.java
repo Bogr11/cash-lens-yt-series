@@ -16,8 +16,8 @@ class AiConfig {
     @Value("${gemini.model}")
     private String textModel;
 
-    @Value("${gemini.vision-model}")
-    private String visionModel;
+    @Value("${gemini.multimodal-model}")
+    private String multimodalModel;
 
     @Bean
     ChatModel geminiChatModel() {
@@ -26,12 +26,13 @@ class AiConfig {
 
     /**
      * A second model bean, because AiServices binds one model per interface.
-     * Today both point at the same Gemini; the moment receipts need a stronger
-     * model than plain text, only this line changes.
+     * Receipts and voice notes share it — both are just non-text carriers.
+     * Today it points at the same Gemini as plain text; when that changes,
+     * only this line does.
      */
     @Bean
-    ChatModel geminiVisionChatModel() {
-        return model(visionModel);
+    ChatModel geminiMultimodalChatModel() {
+        return model(multimodalModel);
     }
 
     @Bean
@@ -42,9 +43,16 @@ class AiConfig {
     }
 
     @Bean
-    ReceiptAiAssistant receiptAiAssistant(ChatModel geminiVisionChatModel) {
+    ReceiptAiAssistant receiptAiAssistant(ChatModel geminiMultimodalChatModel) {
         return AiServices.builder(ReceiptAiAssistant.class)
-                .chatModel(geminiVisionChatModel)
+                .chatModel(geminiMultimodalChatModel)
+                .build();
+    }
+
+    @Bean
+    VoiceAiAssistant voiceAiAssistant(ChatModel geminiMultimodalChatModel) {
+        return AiServices.builder(VoiceAiAssistant.class)
+                .chatModel(geminiMultimodalChatModel)
                 .build();
     }
 

@@ -30,10 +30,12 @@ interface ReceiptAiAssistant {
             """ + ExtractionRules.FIELDS;
 
     /**
-     * Both parameters are annotated: LangChain4j collects every Content-typed
-     * argument into the user message, so the image travels with the instruction.
+     * The image is the whole user message — LangChain4j appends every Content-typed
+     * argument to it. No text parameter: there is nothing to say that the system
+     * message does not already say.
      */
     @SystemMessage(PROMPT)
-    ParsedExpense extract(@UserMessage String instruction, @UserMessage ImageContent receipt);
+    @UserMessage("Extract the expense from this receipt.")
+    ParsedExpense extract(ImageContent receipt);
 
 }

@@ -24,8 +24,8 @@ class InboundService {
         accept(externalId, () -> InboundMessage.received(externalId, payload, InputSource.TEXT_MESSAGE));
     }
 
-    void receivePhoto(String externalId, byte[] content, String fileName) {
-        accept(externalId, () -> InboundMessage.receivedPhoto(externalId, fileName, content));
+    void receiveFile(String externalId, byte[] content, String fileName, InputSource source) {
+        accept(externalId, () -> InboundMessage.receivedFile(externalId, fileName, content, source));
     }
 
     /**

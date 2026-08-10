@@ -24,11 +24,12 @@ class InboundMessage {
     private String payload;
 
     /**
-     * The photo, stored in the same row and the same transaction as the message.
-     * An inbox that keeps a record of a photo but not the photo is not an inbox —
-     * the row would be a receipt for something we no longer have.
+     * The file itself — a photo or a voice note — stored in the same row and the
+     * same transaction as the message. An inbox that keeps a record of a photo but
+     * not the photo is not an inbox: the row would be a receipt for something we
+     * no longer have.
      * <p>
-     * Cleared once the message reaches PROCESSED: a phone photo is 3-5MB, and the
+     * Cleared once the message reaches PROCESSED: a phone photo is 3-5MB and the
      * parsed expense is what we actually keep. FAILED messages keep their bytes,
      * because those are the ones a retry would need.
      */
@@ -52,8 +53,9 @@ class InboundMessage {
         return new InboundMessage(externalId, payload, source, null);
     }
 
-    static InboundMessage receivedPhoto(String externalId, String fileName, byte[] content) {
-        return new InboundMessage(externalId, fileName, InputSource.PHOTO, content);
+    /** For carriers whose message is a file: the payload holds the name, the content holds the bytes. */
+    static InboundMessage receivedFile(String externalId, String fileName, byte[] content, InputSource source) {
+        return new InboundMessage(externalId, fileName, source, content);
     }
 
     void markProcessed() {

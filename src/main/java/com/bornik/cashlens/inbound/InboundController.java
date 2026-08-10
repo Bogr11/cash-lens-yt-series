@@ -30,8 +30,18 @@ class InboundController {
     @PostMapping(value = "/save/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<?> savePhoto(@RequestPart String externalId,
                                 @RequestPart MultipartFile file) {
+        return saveFile(externalId, file, InputSource.PHOTO);
+    }
+
+    @PostMapping(value = "/save/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<?> saveVoice(@RequestPart String externalId,
+                                @RequestPart MultipartFile file) {
+        return saveFile(externalId, file, InputSource.VOICE_MESSAGE);
+    }
+
+    private ResponseEntity<?> saveFile(String externalId, MultipartFile file, InputSource source) {
         Objects.requireNonNull(externalId);
-        service.receivePhoto(externalId, bytesOf(file), file.getOriginalFilename());
+        service.receiveFile(externalId, bytesOf(file), file.getOriginalFilename(), source);
         return ResponseEntity.accepted().build();
     }
 
