@@ -8,10 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 
 /**
@@ -36,7 +32,7 @@ public class ProcessingFacade {
         // models — and one record. Everything below this switch is unaware.
         ParsedExpense parsed = switch (message.source()) {
             case TEXT_MESSAGE -> expenseAiAssistant.extract(message.payload());
-            case PHOTO -> extractFromReceipt(message.payload());
+            case PHOTO -> extractFromReceipt(message.content(), message.payload());
             case VOICE_MESSAGE -> throw new UnsupportedOperationException(
                     "Voice messages are not supported yet");
         };
@@ -46,21 +42,34 @@ public class ProcessingFacade {
         log.info("Saved {}", saved);
     }
 
-    private ParsedExpense extractFromReceipt(String path) {
-        Path file = Path.of(path);
-        try {
-            String base64 = Base64.getEncoder().encodeToString(Files.readAllBytes(file));
-            String mimeType = Files.probeContentType(file);
-
-            ImageContent receipt = ImageContent.from(Image.builder()
-                    .base64Data(base64)
-                    .mimeType(mimeType == null ? DEFAULT_MIME_TYPE : mimeType)
-                    .build());
-
-            return receiptAiAssistant.extract(RECEIPT_INSTRUCTION, receipt);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not read receipt " + file, e);
+    private ParsedExpense extractFromReceipt(byte[] content, String fileName) {
+        if (content == null || content.length == 0) {
+            throw new IllegalStateException("Photo message " + fileName + " carries no image");
         }
+
+        ImageContent receipt = ImageContent.from(Image.builder()
+                .base64Data(Base64.getEncoder().encodeToString(content))
+                .mimeType(mimeTypeOf(fileName))
+                .build());
+
+        return receiptAiAssistant.extract(RECEIPT_INSTRUCTION, receipt);
+    }
+
+    private String mimeTypeOf(String fileName) {
+        if (fileName == null) {
+            return DEFAULT_MIME_TYPE;
+        }
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".png")) {
+            return "image/png";
+        }
+        if (lower.endsWith(".webp")) {
+            return "image/webp";
+        }
+        if (lower.endsWith(".heic")) {
+            return "image/heic";
+        }
+        return DEFAULT_MIME_TYPE;
     }
 
 }

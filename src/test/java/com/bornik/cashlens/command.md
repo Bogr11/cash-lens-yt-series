@@ -10,8 +10,9 @@ curl.exe -i -X POST http://127.0.0.1:8080/inbound/save/text -H "Content-Type: ap
 
 ## Photo
 
-`externalId` and `file` are separate parts. The path is whatever you dropped the
-receipt at — keep receipts out of the repo, `uploads/` is gitignored.
+`externalId` and `file` are separate parts. The image is stored in the inbound
+message row and dropped once the message reaches PROCESSED — so keep the file
+somewhere outside the repo and off camera if it has your card number on it.
 
 ```
 curl.exe -i -X POST http://127.0.0.1:8080/inbound/save/photo -F "externalId=rcpt_001" -F "file=@C:/Users/borys/Desktop/receipt.jpg" -w "`nHTTP %{http_code} - took %{time_total}s`n"

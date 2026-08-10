@@ -31,5 +31,3 @@ gemini:
   model: ${GEMINI_MODEL:gemini-3.6-flash}
   vision-model: ${GEMINI_VISION_MODEL:gemini-3.6-flash}
 
-cashlens:
-  upload-dir: ./uploads

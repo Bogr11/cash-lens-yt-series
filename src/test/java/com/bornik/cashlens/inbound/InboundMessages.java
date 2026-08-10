@@ -6,11 +6,11 @@ package com.bornik.cashlens.inbound;
 public final class InboundMessages {
 
     public static InboundMessageDto textMessage(String payload) {
-        return new InboundMessageDto(payload, InputSource.TEXT_MESSAGE);
+        return new InboundMessageDto(payload, InputSource.TEXT_MESSAGE, null);
     }
 
-    public static InboundMessageDto receipt(String path) {
-        return new InboundMessageDto(path, InputSource.PHOTO);
+    public static InboundMessageDto receipt(byte[] content, String fileName) {
+        return new InboundMessageDto(fileName, InputSource.PHOTO, content);
     }
 
     private InboundMessages() {
