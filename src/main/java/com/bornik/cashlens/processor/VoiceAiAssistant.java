@@ -4,14 +4,6 @@ import dev.langchain4j.data.message.AudioContent;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 
-/**
- * Reads a spoken expense. Mirror of {@link ReceiptAiAssistant} — same shape,
- * different carrier, same record out.
- * <p>
- * A transcribe-then-parse chain would work here, unlike with receipts: speech has
- * no layout to lose. It stays a single call anyway, because doing it the same way
- * as every other carrier is the point.
- */
 interface VoiceAiAssistant {
 
     String PROMPT = """

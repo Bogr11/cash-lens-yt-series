@@ -45,7 +45,6 @@ class ProcessingFacadeTest {
     @InjectMocks
     private ProcessingFacade processingFacade;
 
-    // --- text ---
 
     @Test
     void savesParsedExpense() {
@@ -87,14 +86,13 @@ class ProcessingFacadeTest {
         assertThat(saved.getOccurredAt()).isNull();
     }
 
-    // --- photo ---
 
     @Test
     void sendsThePhotoToTheReceiptAssistantAndSavesWhatComesBack() {
         when(receiptAssistant.extract(any(ImageContent.class)))
                 .thenReturn(parsed("22.75", "GROCERIES", "groceries", "Mercadona", LocalDate.of(2026, 8, 3), 0.95));
 
-        processingFacade.process(receipt(BYTES, "receipt.jpg"));
+        processingFacade.process(receipt(BYTES, "image/jpeg"));
 
         ArgumentCaptor<ImageContent> sent = ArgumentCaptor.forClass(ImageContent.class);
         verify(receiptAssistant).extract(sent.capture());
@@ -106,25 +104,24 @@ class ProcessingFacadeTest {
     }
 
     @Test
-    void derivesTheMimeTypeFromTheFileName() {
+    void passesTheDeclaredContentTypeThrough() {
         when(receiptAssistant.extract(any(ImageContent.class)))
                 .thenReturn(parsed("1", "OTHER", "x", null, null, 0.5));
 
-        processingFacade.process(receipt(BYTES, "scan.png"));
+        processingFacade.process(receipt(BYTES, "image/png"));
 
         ArgumentCaptor<ImageContent> sent = ArgumentCaptor.forClass(ImageContent.class);
         verify(receiptAssistant).extract(sent.capture());
         assertThat(sent.getValue().image().mimeType()).isEqualTo("image/png");
     }
 
-    // --- voice ---
 
     @Test
     void sendsTheVoiceNoteToTheVoiceAssistant() {
         when(voiceAssistant.extract(any(AudioContent.class)))
                 .thenReturn(parsed("12.00", "EATING_OUT", "espresso and a sandwich", null, null, 0.9));
 
-        processingFacade.process(voice(BYTES, "note.m4a"));
+        processingFacade.process(voice(BYTES, "audio/mp4"));
 
         ArgumentCaptor<AudioContent> sent = ArgumentCaptor.forClass(AudioContent.class);
         verify(voiceAssistant).extract(sent.capture());
@@ -134,13 +131,12 @@ class ProcessingFacadeTest {
         verifyNoInteractions(assistant, receiptAssistant);
     }
 
-    // --- guard ---
 
     @Test
     void refusesAFileMessageThatCarriesNoBytes() {
-        assertThatThrownBy(() -> processingFacade.process(receipt(null, "receipt.jpg")))
+        assertThatThrownBy(() -> processingFacade.process(receipt(null, "image/jpeg")))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("receipt.jpg");
+                .hasMessageContaining("PHOTO");
 
         verifyNoInteractions(receiptAssistant, repository);
     }

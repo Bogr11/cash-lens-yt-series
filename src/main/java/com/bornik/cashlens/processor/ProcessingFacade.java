@@ -11,12 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
-import java.util.Map;
 
-/**
- * The only public class of this package, with the only public method.
- * Nothing outside can reach the entity, the repository or the assistants.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,15 +20,6 @@ public class ProcessingFacade {
     private static final String DEFAULT_IMAGE_TYPE = "image/jpeg";
     private static final String DEFAULT_AUDIO_TYPE = "audio/mp4";
 
-    private static final Map<String, String> MIME_TYPES = Map.of(
-            ".png", "image/png",
-            ".webp", "image/webp",
-            ".heic", "image/heic",
-            ".m4a", "audio/mp4",
-            ".mp3", "audio/mpeg",
-            ".ogg", "audio/ogg",
-            ".wav", "audio/wav");
-
     private final ExpenseAiAssistant expenseAiAssistant;
     private final ReceiptAiAssistant receiptAiAssistant;
     private final VoiceAiAssistant voiceAiAssistant;
@@ -41,7 +27,6 @@ public class ProcessingFacade {
 
     @Transactional
     public void process(InboundMessageDto message) {
-        // Three carriers, three prompts, one record. Everything below is unaware.
         ParsedExpense parsed = switch (message.source()) {
             case TEXT_MESSAGE -> expenseAiAssistant.extract(message.payload());
             case PHOTO -> extractFromReceipt(message);
@@ -54,42 +39,30 @@ public class ProcessingFacade {
     }
 
     private ParsedExpense extractFromReceipt(InboundMessageDto message) {
-        ImageContent receipt = ImageContent.from(Image.builder()
+        return receiptAiAssistant.extract(ImageContent.from(Image.builder()
                 .base64Data(base64Of(message))
-                .mimeType(mimeTypeOf(message.payload(), DEFAULT_IMAGE_TYPE))
-                .build());
-
-        return receiptAiAssistant.extract(receipt);
+                .mimeType(contentTypeOf(message, DEFAULT_IMAGE_TYPE))
+                .build()));
     }
 
     private ParsedExpense extractFromVoice(InboundMessageDto message) {
-        AudioContent voice = AudioContent.from(Audio.builder()
+        return voiceAiAssistant.extract(AudioContent.from(Audio.builder()
                 .base64Data(base64Of(message))
-                .mimeType(mimeTypeOf(message.payload(), DEFAULT_AUDIO_TYPE))
-                .build());
-
-        return voiceAiAssistant.extract(voice);
+                .mimeType(contentTypeOf(message, DEFAULT_AUDIO_TYPE))
+                .build()));
     }
 
     private String base64Of(InboundMessageDto message) {
         byte[] content = message.content();
         if (content == null || content.length == 0) {
-            throw new IllegalStateException(
-                    message.source() + " message " + message.payload() + " carries no content");
+            throw new IllegalStateException(message.source() + " message carries no content");
         }
         return Base64.getEncoder().encodeToString(content);
     }
 
-    private String mimeTypeOf(String fileName, String fallback) {
-        if (fileName == null) {
-            return fallback;
-        }
-        String lower = fileName.toLowerCase();
-        return MIME_TYPES.entrySet().stream()
-                .filter(entry -> lower.endsWith(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(fallback);
+    private String contentTypeOf(InboundMessageDto message, String fallback) {
+        String contentType = message.contentType();
+        return contentType == null || contentType.isBlank() ? fallback : contentType;
     }
 
 }

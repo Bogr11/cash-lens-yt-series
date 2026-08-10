@@ -24,12 +24,6 @@ class AiConfig {
         return model(textModel);
     }
 
-    /**
-     * A second model bean, because AiServices binds one model per interface.
-     * Receipts and voice notes share it — both are just non-text carriers.
-     * Today it points at the same Gemini as plain text; when that changes,
-     * only this line does.
-     */
     @Bean
     ChatModel geminiMultimodalChatModel() {
         return model(multimodalModel);

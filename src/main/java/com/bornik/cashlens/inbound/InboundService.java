@@ -21,17 +21,13 @@ class InboundService {
     private final ProcessingFacade processingFacade;
 
     void receive(String externalId, String payload) {
-        accept(externalId, () -> InboundMessage.received(externalId, payload, InputSource.TEXT_MESSAGE));
+        accept(externalId, () -> InboundMessage.receivedText(externalId, payload));
     }
 
-    void receiveFile(String externalId, byte[] content, String fileName, InputSource source) {
-        accept(externalId, () -> InboundMessage.receivedFile(externalId, fileName, content, source));
+    void receiveFile(String externalId, byte[] content, String contentType, InputSource source) {
+        accept(externalId, () -> InboundMessage.receivedFile(externalId, content, contentType, source));
     }
 
-    /**
-     * The message is saved BEFORE the handoff, so 202 means it is durable —
-     * not that it sits in an in-memory queue.
-     */
     private void accept(String externalId, Supplier<InboundMessage> message) {
         if (repository.existsByExternalId(externalId)) {
             log.info("Received duplicate request. Skipping. ExternalId={}", externalId);
@@ -45,7 +41,6 @@ class InboundService {
     private void process(InboundMessage message) {
         try {
             processingFacade.process(InboundMessageDto.of(message));
-            // Drops the stored photo along the way — the parsed expense is what we keep.
             message.markProcessed();
             repository.save(message);
             log.info("InboundMessage processing succeeded {}", message);

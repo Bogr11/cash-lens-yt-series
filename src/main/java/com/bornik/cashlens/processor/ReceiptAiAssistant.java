@@ -4,16 +4,6 @@ import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 
-/**
- * Reads a photo of a receipt. Separate from the text extractor on purpose:
- * different prompt, different failure modes, and — because AiServices binds one
- * model per interface — the freedom to run this on a stronger vision model
- * while plain text stays on a cheap fast one.
- * <p>
- * Deliberately NOT a chain of "vision reads text -> text extractor parses it":
- * that costs two calls and throws away the layout, which is exactly what tells
- * the model apart a total from a line item.
- */
 interface ReceiptAiAssistant {
 
     String PROMPT = """
@@ -29,11 +19,6 @@ interface ReceiptAiAssistant {
 
             """ + ExtractionRules.FIELDS;
 
-    /**
-     * The image is the whole user message — LangChain4j appends every Content-typed
-     * argument to it. No text parameter: there is nothing to say that the system
-     * message does not already say.
-     */
     @SystemMessage(PROMPT)
     @UserMessage("Extract the expense from this receipt.")
     ParsedExpense extract(ImageContent receipt);

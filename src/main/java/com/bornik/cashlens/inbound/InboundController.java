@@ -41,7 +41,7 @@ class InboundController {
 
     private ResponseEntity<?> saveFile(String externalId, MultipartFile file, InputSource source) {
         Objects.requireNonNull(externalId);
-        service.receiveFile(externalId, bytesOf(file), file.getOriginalFilename(), source);
+        service.receiveFile(externalId, bytesOf(file), file.getContentType(), source);
         return ResponseEntity.accepted().build();
     }
 

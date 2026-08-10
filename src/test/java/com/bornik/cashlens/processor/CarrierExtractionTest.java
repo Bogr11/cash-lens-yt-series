@@ -15,12 +15,6 @@ import java.util.Base64;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-/**
- * Hits the real model with a real receipt and a real voice note.
- * <p>
- * Fixtures live in src/test/resources. Each test skips itself when its file is
- * missing, so the suite stays green for anyone who cloned the repo without them.
- */
 @SpringBootTest
 class CarrierExtractionTest {
 

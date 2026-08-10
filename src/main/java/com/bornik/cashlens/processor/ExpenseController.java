@@ -10,10 +10,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Package-private and living next to the entity, so nothing has to be opened up
- * to let expenses out. The entity itself still never leaves — the view does.
- */
 @RestController
 @RequestMapping("/expenses")
 @RequiredArgsConstructor

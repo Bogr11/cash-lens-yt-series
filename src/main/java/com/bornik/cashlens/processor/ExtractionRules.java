@@ -1,9 +1,5 @@
 package com.bornik.cashlens.processor;
 
-/**
- * The field rules both extractors answer to. They read different carriers,
- * they may run on different models — but they fill the same record.
- */
 final class ExtractionRules {
 
     static final String FIELDS = """
