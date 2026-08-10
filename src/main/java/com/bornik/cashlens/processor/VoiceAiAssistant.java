@@ -11,8 +11,10 @@ interface VoiceAiAssistant {
 
             LISTENING RULES:
             - The speaker is describing something they paid for, casually and in one breath.
-            - Numbers may be spoken in words ("forty seven fifty" -> 47.50).
+            - Amounts may be spoken as words rather than digits. Convert them to a number.
             - Any language. Infer the currency from what is said, or from the language.
+            - Use only what you actually heard. Never take a number, a currency or a
+              merchant from these instructions.
             - Mumbled, noisy or half-heard audio gets a LOW confidence — that is what the
               field is for. Do not invent an amount you did not actually hear.
 

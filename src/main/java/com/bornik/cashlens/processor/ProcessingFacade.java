@@ -19,6 +19,7 @@ public class ProcessingFacade {
 
     private static final String DEFAULT_IMAGE_TYPE = "image/jpeg";
     private static final String DEFAULT_AUDIO_TYPE = "audio/mp4";
+    private static final String GENERIC_BINARY = "application/octet-stream";
 
     private final ExpenseAiAssistant expenseAiAssistant;
     private final ReceiptAiAssistant receiptAiAssistant;
@@ -62,7 +63,10 @@ public class ProcessingFacade {
 
     private String contentTypeOf(InboundMessageDto message, String fallback) {
         String contentType = message.contentType();
-        return contentType == null || contentType.isBlank() ? fallback : contentType;
+        if (contentType == null || contentType.isBlank() || contentType.equals(GENERIC_BINARY)) {
+            return fallback;
+        }
+        return contentType;
     }
 
 }

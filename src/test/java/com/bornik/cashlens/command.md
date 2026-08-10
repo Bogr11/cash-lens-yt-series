@@ -1,8 +1,3 @@
-# Demo commands
-
-PowerShell, **run from the project root**. Everything the demo needs is in
-`src/test/resources`.
-
 ## Text
 
 ```

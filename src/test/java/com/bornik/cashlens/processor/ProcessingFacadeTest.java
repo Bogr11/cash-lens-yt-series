@@ -117,6 +117,18 @@ class ProcessingFacadeTest {
 
 
     @Test
+    void fallsBackWhenTheClientDeclaresGenericBinary() {
+        when(voiceAssistant.extract(any(AudioContent.class)))
+                .thenReturn(parsed("1", "OTHER", "x", null, null, 0.5));
+
+        processingFacade.process(voice(BYTES, "application/octet-stream"));
+
+        ArgumentCaptor<AudioContent> sent = ArgumentCaptor.forClass(AudioContent.class);
+        verify(voiceAssistant).extract(sent.capture());
+        assertThat(sent.getValue().audio().mimeType()).isEqualTo("audio/mp4");
+    }
+
+    @Test
     void sendsTheVoiceNoteToTheVoiceAssistant() {
         when(voiceAssistant.extract(any(AudioContent.class)))
                 .thenReturn(parsed("12.00", "EATING_OUT", "espresso and a sandwich", null, null, 0.9));
