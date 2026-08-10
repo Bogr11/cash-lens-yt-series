@@ -23,6 +23,9 @@ class ProcessingFacadeTest {
     private ExpenseAiAssistant assistant;
 
     @Mock
+    private ReceiptAiAssistant receiptAssistant;
+
+    @Mock
     private ExpenseRepository repository;
 
     @InjectMocks

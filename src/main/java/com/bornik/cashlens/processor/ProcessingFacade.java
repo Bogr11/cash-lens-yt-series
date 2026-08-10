@@ -26,14 +26,16 @@ public class ProcessingFacade {
     private static final String DEFAULT_MIME_TYPE = "image/jpeg";
     private static final String RECEIPT_INSTRUCTION = "Extract the expense from this receipt.";
 
-    private final ExpenseAiAssistant assistant;
+    private final ExpenseAiAssistant expenseAiAssistant;
+    private final ReceiptAiAssistant receiptAiAssistant;
     private final ExpenseRepository repository;
 
     @Transactional
     public void process(InboundMessageDto message) {
-        // Only the carrier differs. Everything below this switch does not know that.
+        // Two different extractors, two different prompts, possibly two different
+        // models — and one record. Everything below this switch is unaware.
         ParsedExpense parsed = switch (message.source()) {
-            case TEXT_MESSAGE -> assistant.extract(message.payload());
+            case TEXT_MESSAGE -> expenseAiAssistant.extract(message.payload());
             case PHOTO -> extractFromReceipt(message.payload());
             case VOICE_MESSAGE -> throw new UnsupportedOperationException(
                     "Voice messages are not supported yet");
@@ -55,7 +57,7 @@ public class ProcessingFacade {
                     .mimeType(mimeType == null ? DEFAULT_MIME_TYPE : mimeType)
                     .build());
 
-            return assistant.extractFromReceipt(RECEIPT_INSTRUCTION, receipt);
+            return receiptAiAssistant.extract(RECEIPT_INSTRUCTION, receipt);
         } catch (IOException e) {
             throw new UncheckedIOException("Could not read receipt " + file, e);
         }
