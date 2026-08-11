@@ -22,6 +22,7 @@ class InboundMessage {
     @Column(columnDefinition = "text")
     private String payload;
 
+    @ToString.Exclude
     @Column(columnDefinition = "bytea")
     private byte[] content;
 
