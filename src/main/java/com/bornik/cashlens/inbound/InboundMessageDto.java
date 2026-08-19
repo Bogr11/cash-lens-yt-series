@@ -6,4 +6,16 @@ public record InboundMessageDto(InboundMessage inboundMessage) {
         return inboundMessage.getPayload();
     }
 
+    public InputSource source() {
+        return inboundMessage.getSource();
+    }
+
+    public byte[] content() {
+        return inboundMessage.getContent();
+    }
+
+    public String contentType() {
+        return inboundMessage.getContentType();
+    }
+
 }

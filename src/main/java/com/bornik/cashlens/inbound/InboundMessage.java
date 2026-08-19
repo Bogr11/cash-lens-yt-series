@@ -19,8 +19,15 @@ class InboundMessage {
     @Column(nullable = false, unique = true)
     private String externalId;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(columnDefinition = "text")
     private String payload;
+
+    @ToString.Exclude
+    @Column(columnDefinition = "bytea")
+    private byte[] content;
+
+    @Column
+    private String contentType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,13 +41,21 @@ class InboundMessage {
     @Column(nullable = false, updatable = false)
     private Instant receivedAt;
 
-    static InboundMessage received(String externalId, String payload, InputSource source) {
-        return new InboundMessage(externalId, payload, source);
+    static InboundMessage receivedAsText(String externalId, String payload) {
+        var msg = new InboundMessage(externalId, InputSource.TEXT_MESSAGE);
+        msg.payload = payload;
+        return msg;
     }
 
-    private InboundMessage(String externalId, String payload, InputSource source) {
+    static InboundMessage receivedAsFile(String externalId, byte[] content, String contentType, InputSource source) {
+        var msg = new InboundMessage(externalId, source);
+        msg.content = content;
+        msg.contentType = contentType;
+        return msg;
+    }
+
+    private InboundMessage(String externalId, InputSource source) {
         this.externalId = externalId;
-        this.payload = payload;
         this.source = source;
         this.status = ProcessingStatus.RECEIVED;
         this.receivedAt = Instant.now();
