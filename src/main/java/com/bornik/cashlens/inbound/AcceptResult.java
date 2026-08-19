@@ -1,4 +1,5 @@
 package com.bornik.cashlens.inbound;
 
-record AcceptResult() {
+enum AcceptResult {
+    ACCEPTED, DUPLICATE
 }

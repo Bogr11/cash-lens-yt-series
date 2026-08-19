@@ -21,17 +21,17 @@ class InboundService {
     private final ProcessingFacade processingFacade;
 
     AcceptResult receiveAsText(String externalId, String payload) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
+        return acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
     }
 
-    void receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
+    AcceptResult receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
+        return acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
     }
 
-    private void acceptMsg(String externalId, Supplier<InboundMessage> message) {
+    private AcceptResult acceptMsg(String externalId, Supplier<InboundMessage> message) {
         if (repository.existsByExternalId(externalId)) {
             log.info("Received duplicate request. Skipping. ExternalId={}", externalId);
-            return;
+            return AcceptResult.DUPLICATE;
         }
 
         InboundMessage saved = repository.save(message.get());
@@ -45,6 +45,8 @@ class InboundService {
                         log.error("Processing failed. ExternalId = {}", externalId, t);
                     }
                 });
+
+        return AcceptResult.ACCEPTED;
     }
 
     private void process(InboundMessage message) {
