@@ -20,7 +20,7 @@ class InboundService {
     private final InboundMessageRepository repository;
     private final ProcessingFacade processingFacade;
 
-    void receiveAsText(String externalId, String payload) {
+    AcceptResult receiveAsText(String externalId, String payload) {
         acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
     }
 
@@ -38,7 +38,13 @@ class InboundService {
 
         CompletableFuture
                 .runAsync(() -> process(saved), EXECUTOR)
-                .whenComplete((r, t) -> log.info("Processed: ExternalId = {}. Message = {}.", externalId, message.get()));
+                .whenComplete((r, t) -> {
+                    if (t == null) {
+                        log.info("Processed: ExternalId = {}. Message = {}.", externalId, saved);
+                    } else {
+                        log.error("Processing failed. ExternalId = {}", externalId, t);
+                    }
+                });
     }
 
     private void process(InboundMessage message) {
