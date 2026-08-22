@@ -1,10 +1,12 @@
 package com.bornik.cashlens.inbound;
 
 import com.bornik.cashlens.processor.ProcessingFacade;
+import com.fasterxml.jackson.annotation.OptBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,14 +54,17 @@ class InboundService {
     private void process(InboundMessage message) {
         try {
             processingFacade.process(new InboundMessageDto(message));
-            message.setStatus(ProcessingStatus.PROCESSED);
+            message.markProcessed();
             repository.save(message);
             log.info("InboundMessage processing succeeded {}", message);
         } catch (Exception e) {
-            message.setStatus(ProcessingStatus.FAILED);
+            message.markFailed(e.getMessage());
             repository.save(message);
             log.error("InboundMessage processing failed {}", message, e);
         }
     }
 
+    Optional<InboundMessage> findByExternalId(String externalId) {
+        return repository.findByExternalId(externalId);
+    }
 }

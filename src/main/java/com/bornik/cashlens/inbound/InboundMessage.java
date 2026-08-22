@@ -1,7 +1,10 @@
 package com.bornik.cashlens.inbound;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.Instant;
 
@@ -33,10 +36,12 @@ class InboundMessage {
     @Column(nullable = false)
     private InputSource source;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProcessingStatus status;
+
+    @Column
+    private String failureReason;
 
     @Column(nullable = false, updatable = false)
     private Instant receivedAt;
@@ -59,6 +64,15 @@ class InboundMessage {
         this.source = source;
         this.status = ProcessingStatus.RECEIVED;
         this.receivedAt = Instant.now();
+    }
+
+    void markProcessed() {
+        this.status = ProcessingStatus.PROCESSED;
+    }
+
+    void markFailed(String failureReason) {
+        this.status = ProcessingStatus.FAILED;
+        this.failureReason = failureReason;
     }
 
 }
