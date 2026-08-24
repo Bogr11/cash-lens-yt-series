@@ -20,25 +20,33 @@ class InboundService {
     private final InboundMessageRepository repository;
     private final ProcessingFacade processingFacade;
 
-    void receiveAsText(String externalId, String payload) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
+    AcceptResult receiveAsText(String externalId, String payload) {
+        return acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
     }
 
-    void receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
+    AcceptResult receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
+        return acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
     }
 
-    private void acceptMsg(String externalId, Supplier<InboundMessage> message) {
+    private AcceptResult acceptMsg(String externalId, Supplier<InboundMessage> message) {
         if (repository.existsByExternalId(externalId)) {
             log.info("Received duplicate request. Skipping. ExternalId={}", externalId);
-            return;
+            return AcceptResult.DUPLICATE;
         }
 
         InboundMessage saved = repository.save(message.get());
 
         CompletableFuture
                 .runAsync(() -> process(saved), EXECUTOR)
-                .whenComplete((r, t) -> log.info("Processed: ExternalId = {}. Message = {}.", externalId, message.get()));
+                .whenComplete((r, t) -> {
+                    if (t == null) {
+                        log.info("Processed: ExternalId = {}. Message = {}.", externalId, saved);
+                    } else {
+                        log.error("Processing failed. ExternalId = {}", externalId, t);
+                    }
+                });
+
+        return AcceptResult.ACCEPTED;
     }
 
     private void process(InboundMessage message) {

@@ -22,7 +22,7 @@ class ExpenseController {
     }
 
     record ExpenseView(Long id, BigDecimal amount, String currency,
-                       String category, String description,
+                       String category, String description, String merchant,
                        Double confidence, Instant createdDate) {
 
         static ExpenseView of(Expense expense) {
@@ -31,6 +31,7 @@ class ExpenseController {
                     expense.getCurrency(),
                     expense.getCategory(),
                     expense.getDescription(),
+                    expense.getMerchant(),
                     expense.getConfidence(),
                     expense.getCreatedDate());
         }

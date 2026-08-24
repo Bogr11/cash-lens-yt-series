@@ -33,6 +33,9 @@ class Expense {
     private String description;
 
     @Column(nullable = false)
+    private String merchant;
+
+    @Column(nullable = false)
     private Double confidence;
 
     @Column(nullable = false, updatable = false)
@@ -43,6 +46,7 @@ class Expense {
         this.currency = parsed.currency();
         this.category = parsed.category();
         this.description = parsed.description();
+        this.merchant = parsed.merchant();
         this.confidence = parsed.confidence();
         this.createdDate = Instant.now();
     }
