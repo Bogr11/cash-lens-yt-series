@@ -14,11 +14,13 @@ import java.util.Objects;
 @RequiredArgsConstructor
 class InboundController {
 
+    private static final String ACCOUNT = "X-Account-Id";
+
     private final InboundService service;
 
     @PostMapping("/save/text")
-    ResponseEntity<?> saveText(@RequestBody InboundTextMessageDto dto) {
-        service.receiveAsText(dto.externalId(), dto.payload());
+    ResponseEntity<?> saveText(@RequestHeader(ACCOUNT) String accountId, @RequestBody InboundTextMessageDto dto) {
+        service.receiveAsText(accountId, dto.externalId(), dto.payload());
         return ResponseEntity.accepted().build();
     }
 
@@ -30,14 +32,14 @@ class InboundController {
     }
 
     @PostMapping(value = "/save/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> savePhoto(@RequestPart String externalId, @RequestPart MultipartFile file) {
-        service.receiveAsFile(externalId, bytes(file), file.getContentType(), InputSource.PHOTO);
+    ResponseEntity<?> savePhoto(@RequestHeader(ACCOUNT) String accountId, @RequestPart String externalId, @RequestPart MultipartFile file) {
+        service.receiveAsFile(accountId, externalId, bytes(file), file.getContentType(), InputSource.PHOTO);
         return ResponseEntity.accepted().build();
     }
 
     @PostMapping(value = "/save/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> saveVoice(@RequestPart String externalId, @RequestPart MultipartFile file) {
-        service.receiveAsFile(externalId, bytes(file), file.getContentType(), InputSource.VOICE_MESSAGE);
+    ResponseEntity<?> saveVoice(@RequestHeader(ACCOUNT) String accountId, @RequestPart String externalId, @RequestPart MultipartFile file) {
+        service.receiveAsFile(accountId, externalId, bytes(file), file.getContentType(), InputSource.VOICE_MESSAGE);
         return ResponseEntity.accepted().build();
     }
 

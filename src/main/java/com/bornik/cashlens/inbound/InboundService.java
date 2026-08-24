@@ -20,16 +20,16 @@ class InboundService {
     private final InboundMessageRepository repository;
     private final ProcessingFacade processingFacade;
 
-    void receiveAsText(String externalId, String payload) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsText(externalId, payload));
+    void receiveAsText(String accountId, String externalId, String payload) {
+        acceptMsg(accountId, externalId, () -> InboundMessage.receivedAsText(accountId, externalId, payload));
     }
 
-    void receiveAsFile(String externalId, byte[] content, String contentType, InputSource source) {
-        acceptMsg(externalId, () -> InboundMessage.receivedAsFile(externalId, content, contentType, source));
+    void receiveAsFile(String accountId, String externalId, byte[] content, String contentType, InputSource source) {
+        acceptMsg(accountId, externalId, () -> InboundMessage.receivedAsFile(accountId, externalId, content, contentType, source));
     }
 
-    private void acceptMsg(String externalId, Supplier<InboundMessage> message) {
-        if (repository.existsByExternalId(externalId)) {
+    private void acceptMsg(String accountId, String externalId, Supplier<InboundMessage> message) {
+        if (repository.existsByAccountIdExternalId(accountId, externalId)) {
             log.info("Received duplicate request. Skipping. ExternalId={}", externalId);
             return;
         }
