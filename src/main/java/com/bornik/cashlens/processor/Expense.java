@@ -32,6 +32,9 @@ class Expense {
     @Column(nullable = false)
     private String description;
 
+    @Column
+    private String merchant;
+
     @Column(nullable = false)
     private String merchant;
 
