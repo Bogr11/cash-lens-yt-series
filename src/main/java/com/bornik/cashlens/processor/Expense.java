@@ -36,6 +36,9 @@ class Expense {
     private String merchant;
 
     @Column(nullable = false)
+    private String merchant;
+
+    @Column(nullable = false)
     private Double confidence;
 
     @Column(nullable = false, updatable = false)
