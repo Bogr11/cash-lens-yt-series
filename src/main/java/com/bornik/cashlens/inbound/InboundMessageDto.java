@@ -2,6 +2,10 @@ package com.bornik.cashlens.inbound;
 
 public record InboundMessageDto(InboundMessage inboundMessage) {
 
+    public String accountId() {
+        return inboundMessage.getAccountId();
+    }
+
     public String payload() {
         return inboundMessage.getPayload();
     }

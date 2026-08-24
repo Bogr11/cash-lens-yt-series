@@ -21,6 +21,9 @@ class Expense {
     private Long id;
 
     @Column(nullable = false)
+    private String accountId;
+
+    @Column(nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false)
@@ -36,15 +39,13 @@ class Expense {
     private String merchant;
 
     @Column(nullable = false)
-    private String merchant;
-
-    @Column(nullable = false)
     private Double confidence;
 
     @Column(nullable = false, updatable = false)
     private Instant createdDate;
 
-    Expense(ParsedExpense parsed) {
+    Expense(String accountId, ParsedExpense parsed) {
+        this.accountId = accountId;
         this.amount = parsed.amount();
         this.currency = parsed.currency();
         this.category = parsed.category();
