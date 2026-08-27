@@ -8,7 +8,7 @@ import java.util.Optional;
 @Repository
 interface InboundMessageRepository extends JpaRepository<InboundMessage, Long> {
 
-    boolean existsByExternalId(String externalId);
+    boolean existsByAccountIdAndExternalId(String accountId, String externalId);
 
-    Optional<InboundMessage> findByExternalId(String externalId);
+    Optional<InboundMessage> findByAccountIdAndExternalId(String accountId, String externalId);
 }

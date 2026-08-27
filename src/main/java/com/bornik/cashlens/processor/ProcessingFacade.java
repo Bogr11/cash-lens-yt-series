@@ -26,7 +26,7 @@ public class ProcessingFacade {
     @Transactional
     public void process(InboundMessageDto message) {
         var parsed = parse(message);
-        save(parsed);
+        save(message.accountId(), parsed);
     }
 
     private ParsedExpense parse(InboundMessageDto message) {
@@ -40,8 +40,8 @@ public class ProcessingFacade {
         return parsed;
     }
 
-    private void save(ParsedExpense parsed) {
-        var saved = repository.save(new Expense(parsed));
+    private void save(String accountId, ParsedExpense parsed) {
+        var saved = repository.save(new Expense(accountId, parsed));
         log.info("Saved {}", saved);
     }
 

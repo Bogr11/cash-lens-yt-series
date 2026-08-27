@@ -19,6 +19,8 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 class InboundController {
 
+    private static final String ACCOUNT = "X-Account-Id";
+
     private static final Function<String, URI> LOCATION = extId -> URI.create("/inbound/" + extId);
 
     private static final Map<AcceptResult, Function<String, ResponseEntity<?>>> RESULT_MAP = Map.of(
@@ -29,8 +31,8 @@ class InboundController {
     private final InboundService service;
 
     @PostMapping("/save/text")
-    ResponseEntity<?> saveText(@RequestBody InboundTextMessageDto dto) {
-        var accept = service.receiveAsText(dto.externalId(), dto.payload());
+    ResponseEntity<?> saveText(@RequestHeader(ACCOUNT) String accountId, @RequestBody InboundTextMessageDto dto) {
+        var accept = service.receiveAsText(accountId, dto.externalId(), dto.payload());
         return RESULT_MAP.get(accept).apply(dto.externalId());
     }
 
@@ -42,20 +44,20 @@ class InboundController {
     }
 
     @PostMapping(value = "/save/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> savePhoto(@RequestPart String externalId, @RequestPart MultipartFile file) {
-        var accept = service.receiveAsFile(externalId, bytes(file), file.getContentType(), InputSource.PHOTO);
+    ResponseEntity<?> savePhoto(@RequestHeader(ACCOUNT) String accountId, @RequestPart String externalId, @RequestPart MultipartFile file) {
+        var accept = service.receiveAsFile(accountId, externalId, bytes(file), file.getContentType(), InputSource.PHOTO);
         return RESULT_MAP.get(accept).apply(externalId);
     }
 
     @PostMapping(value = "/save/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> saveVoice(@RequestPart String externalId, @RequestPart MultipartFile file) {
-        var accept = service.receiveAsFile(externalId, bytes(file), file.getContentType(), InputSource.VOICE_MESSAGE);
+    ResponseEntity<?> saveVoice(@RequestHeader(ACCOUNT) String accountId, @RequestPart String externalId, @RequestPart MultipartFile file) {
+        var accept = service.receiveAsFile(accountId, externalId, bytes(file), file.getContentType(), InputSource.VOICE_MESSAGE);
         return RESULT_MAP.get(accept).apply(externalId);
     }
 
     @GetMapping("/{externalId}")
-    ResponseEntity<InboundMessageView> getStatus(@PathVariable String externalId) {
-        return service.findByExternalId(externalId)
+    ResponseEntity<InboundMessageView> getStatus(@RequestHeader(ACCOUNT) String accountId, @PathVariable String externalId) {
+        return service.findByAccountIdAndExternalId(accountId, externalId)
                 .map(InboundMessageView::of)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
