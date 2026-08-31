@@ -37,7 +37,7 @@ curl.exe -s http://127.0.0.1:8080/expenses -H "X-Account-Id: acc_a" | ConvertFro
 ```
 
 ```
-curl.exe -s http://127.0.0.1:8080/expenses -H "X-Account-Id: acc_b" | ConvertFrom-Json | Format-Table amount, currency, category, merchant, confidence
+curl.exe -s http://127.0.0.1:8080/expenses -H "X-Account-Id: demo_acc_sdfasdf+--009" | ConvertFrom-Json | Format-Table amount, currency, category, merchant, confidence
 ```
 
 ## No header at all
