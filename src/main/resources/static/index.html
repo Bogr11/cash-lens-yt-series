@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CashLens — a quiet, focused view of your everyday spending.">
+    <title>CashLens</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="wordmark" href="/" aria-label="CashLens home">CASHLENS <span>01</span></a>
+        <nav class="header-actions" aria-label="Account controls">
+            <button class="text-button" id="accountButton" type="button">ACCOUNT · <span id="accountLabel">DEMO</span></button>
+            <button class="text-button" id="refreshButton" type="button">REFRESH</button>
+        </nav>
+    </div>
+</header>
+
+<main class="shell">
+    <section class="summary" aria-labelledby="summaryTitle">
+        <div>
+            <p class="eyebrow" id="summaryTitle">CASHLENS · <span id="periodLabel">LAST 30 DAYS</span></p>
+            <p class="total" id="grandTotal">—</p>
+            <p class="total-caption"><span id="expenseCount">0</span> expenses captured</p>
+        </div>
+
+        <div class="summary-actions">
+            <button class="primary-button" id="addExpenseButton" type="button">ADD EXPENSE</button>
+            <dl class="quick-stats">
+                <div>
+                    <dt>PER DAY</dt>
+                    <dd id="perDay">—</dd>
+                </div>
+                <div>
+                    <dt>EXPENSES</dt>
+                    <dd id="statCount">0</dd>
+                </div>
+                <div>
+                    <dt>LOW CONF.</dt>
+                    <dd id="lowConfidence">0</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="filters" aria-label="Expense filters">
+        <div class="period-filters" role="group" aria-label="Period">
+            <button class="filter-button active" type="button" data-period="30">30 DAYS</button>
+            <button class="filter-button" type="button" data-period="month">THIS MONTH</button>
+            <button class="filter-button" type="button" data-period="all">ALL TIME</button>
+        </div>
+        <label class="select-wrap">
+            <span class="sr-only">Category</span>
+            <select id="categoryFilter">
+                <option value="">ALL CATEGORIES</option>
+            </select>
+        </label>
+        <label class="select-wrap compact">
+            <span class="sr-only">Currency</span>
+            <select id="currencyFilter">
+                <option value="">ALL CURRENCIES</option>
+            </select>
+        </label>
+    </section>
+
+    <div class="content-grid">
+        <section class="ledger" aria-label="Expense history">
+            <div id="pendingList" class="pending-list" aria-live="polite"></div>
+            <div class="loading-state" id="loadingState">READING THE LEDGER…</div>
+            <div id="expenseList"></div>
+            <div class="empty-state" id="emptyState" hidden>
+                <p>Nothing in this view yet.</p>
+                <button class="secondary-button" type="button" data-open-expense>ADD THE FIRST EXPENSE</button>
+            </div>
+        </section>
+
+        <aside class="breakdowns" aria-label="Expense breakdowns">
+            <section>
+                <h2>WHERE IT WENT</h2>
+                <div id="categoryBreakdown" class="bar-list"></div>
+            </section>
+            <section>
+                <h2>CASH WALLETS</h2>
+                <div id="currencyBreakdown" class="wallet-list"></div>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<dialog class="modal" id="expenseDialog">
+    <div class="modal-heading">
+        <div>
+            <p class="eyebrow">NEW ENTRY</p>
+            <h2>Add an expense</h2>
+        </div>
+        <button class="close-button" type="button" data-close-dialog aria-label="Close">×</button>
+    </div>
+
+    <div class="input-tabs" role="tablist" aria-label="Expense input type">
+        <button class="input-tab active" type="button" role="tab" aria-selected="true" data-input="text">TEXT</button>
+        <button class="input-tab" type="button" role="tab" aria-selected="false" data-input="photo">RECEIPT</button>
+        <button class="input-tab" type="button" role="tab" aria-selected="false" data-input="voice">VOICE</button>
+    </div>
+
+    <form id="expenseForm">
+        <div class="input-panel" data-panel="text">
+            <label for="expenseText">WHAT DID YOU SPEND?</label>
+            <textarea id="expenseText" rows="5" placeholder="Coffee and a croissant, €8.50 at Federal"></textarea>
+            <p class="field-note">Write naturally. CashLens will extract the amount, merchant and category.</p>
+        </div>
+
+        <div class="input-panel" data-panel="photo" hidden>
+            <label class="file-drop" for="receiptFile">
+                <span>CHOOSE A RECEIPT</span>
+                <small>JPG, PNG or WEBP</small>
+            </label>
+            <input class="file-input" id="receiptFile" type="file" accept="image/jpeg,image/png,image/webp">
+            <p class="selected-file" id="receiptFileName">No file selected</p>
+        </div>
+
+        <div class="input-panel" data-panel="voice" hidden>
+            <div class="voice-recorder" id="voiceRecorder">
+                <button class="record-button" id="recordButton" type="button" aria-label="Start voice recording">
+                    <span class="record-glyph" aria-hidden="true"></span>
+                </button>
+                <div class="voice-meter" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <p class="recording-label" id="recordingLabel">PRESS TO RECORD</p>
+                <time class="recording-timer" id="recordingTimer">00:00</time>
+            </div>
+            <p class="field-note">Speak naturally, then press again to stop. Maximum recording: 2 minutes.</p>
+        </div>
+
+        <p class="form-status" id="formStatus" aria-live="polite"></p>
+
+        <div class="modal-actions">
+            <button class="secondary-button" type="button" data-close-dialog>CANCEL</button>
+            <button class="primary-button" id="submitExpenseButton" type="submit">PROCESS EXPENSE</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="modal account-modal" id="accountDialog">
+    <div class="modal-heading">
+        <div>
+            <p class="eyebrow">LOCAL PROFILE</p>
+            <h2>Account ID</h2>
+        </div>
+        <button class="close-button" type="button" data-close-account aria-label="Close">×</button>
+    </div>
+    <form id="accountForm">
+        <label for="accountInput">X-ACCOUNT-ID</label>
+        <input class="text-input" id="accountInput" type="text" autocomplete="off" maxlength="80" required>
+        <p class="field-note">This backend currently uses the account header instead of sign-in.</p>
+        <div class="modal-actions">
+            <button class="secondary-button" type="button" data-close-account>CANCEL</button>
+            <button class="primary-button" type="submit">SAVE ACCOUNT</button>
+        </div>
+    </form>
+</dialog>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
