@@ -1,10 +1,7 @@
 package com.bornik.cashlens.processor;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,11 +14,16 @@ class ExpenseController {
 
     private static final String ACCOUNT = "X-Account-Id";
 
-    private final ExpenseRepository repository;
+    private final ExpenseService expenseService;
 
     @GetMapping
-    List<ExpenseView> all(@RequestHeader(ACCOUNT) String accountId) {
-        return repository.findByAccountId(accountId).stream().map(ExpenseView::of).toList();
+    List<ExpenseView> all(@RequestHeader(ACCOUNT) String accountId, @RequestParam(defaultValue = "false") boolean needsReview) {
+
+        var expenses = needsReview
+                ? expenseService.findNeedingReview(accountId)
+                : expenseService.findAll(accountId);
+
+        return expenses.stream().map(ExpenseView::of).toList();
     }
 
     record ExpenseView(Long id, BigDecimal amount, String currency,
