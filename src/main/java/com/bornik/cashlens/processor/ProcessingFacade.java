@@ -22,6 +22,8 @@ public class ProcessingFacade {
     private final VoiceAiAssistant voiceAiAssistant;
     private final ExpenseAiAssistant textMessageAssistant;
     private final ExpenseRepository repository;
+    private final CategoryResolver categoryResolver;
+
 
     @Transactional
     public void process(InboundMessageDto message) {
@@ -41,7 +43,8 @@ public class ProcessingFacade {
     }
 
     private void save(String accountId, ParsedExpense parsed) {
-        var saved = repository.save(new Expense(accountId, parsed));
+        var category = categoryResolver.resolve(accountId, parsed);
+        var saved = repository.save(new Expense(accountId, parsed, category.value()));
         log.info("Saved {}", saved);
     }
 

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 
 import static com.bornik.cashlens.inbound.InboundMessages.textMessage;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,9 @@ class ProcessingFacadeTest {
 
     @Mock
     private ExpenseRepository repository;
+
+    @Mock
+    private CategoryResolver categoryResolver;
 
     @InjectMocks
     private ProcessingFacade processingFacade;
@@ -55,6 +59,7 @@ class ProcessingFacadeTest {
 
     private void given(ParsedExpense parsed) {
         when(assistant.extract(anyString())).thenReturn(parsed);
+        when(categoryResolver.resolve(anyString(), any())).thenReturn(new CategoryResolver.Category(parsed.category()));
     }
 
     private Expense captureSaved() {
