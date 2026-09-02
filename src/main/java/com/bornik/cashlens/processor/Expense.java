@@ -44,11 +44,11 @@ class Expense {
     @Column(nullable = false, updatable = false)
     private Instant createdDate;
 
-    Expense(String accountId, ParsedExpense parsed) {
+    Expense(String accountId, ParsedExpense parsed, String category) {
         this.accountId = accountId;
         this.amount = parsed.amount();
         this.currency = parsed.currency();
-        this.category = parsed.category();
+        this.category = category;
         this.description = parsed.description();
         this.merchant = parsed.merchant();
         this.confidence = parsed.confidence();
